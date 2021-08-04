@@ -11,19 +11,20 @@ def scrape():
     # Start timer
     start = timeit.default_timer()
 
+    # Get first empty column 
+    col_idx = get_column_letter(ws.max_column + 2)
+
     # Get html using requests
     html_text = request_website()
     # Check if correct spreadsheet
     if not html_text:
+        add_formula(col_idx)
         # Return statement
         return "Skipped"
     # Parse html using lxml
     soup = BeautifulSoup(html_text, 'lxml')
     # Get data
     ranking = soup.find_all('tr', class_ = 'ranking-list')
-
-    # Get first empty column 
-    col_idx = get_column_letter(ws.max_column + 2)
 
     # Loop through entries
     for i in ranking:
@@ -119,6 +120,10 @@ def row_count():
             row_count += 1
     # Return row count + 1
     return row_count
+
+def add_formula(col_idx):
+    for i in range(2, 52):
+        ws[col_idx + str(i)].value = '=COUNTIF(ARV!$' + col_idx + '$' + str(i) + ':$' + col_idx + '$100,">"&ARV!' + col_idx + str(i) + ')+1'
 
 # Load workbook
 wb = load_workbook("./Excel/Input.xlsx")
