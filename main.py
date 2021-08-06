@@ -124,24 +124,28 @@ def add_formula(col_idx):
     for i in range(2, 52):
         ws[col_idx + str(i)].value = '=COUNTIF(ARV!$' + col_idx + '$' + str(i) + ':$' + col_idx + '$100,">"&ARV!' + col_idx + str(i) + ')+1'
 
-# Load workbook
-wb = load_workbook("./Excel/Input.xlsx")
+def main():
+    # Load workbook
+    wb = load_workbook("./Excel/Input.xlsx")
 
-# Get todays date
-today = date.today()
-# Convert date to #YY.MM.DD format
-date = today.strftime("%Y.%m.%d")
+    # Get todays date
+    today = date.today()
+    # Convert date to #YY.MM.DD format
+    date = today.strftime("%Y.%m.%d")
 
-# Loop through worksheets
-for ws in wb:
-    # Add new data to spreadsheet
-    print(scrape())
+    # Loop through worksheets
+    for ws in wb:
+        # Add new data to spreadsheet
+        print(scrape())
 
-# Start timer
-start = timeit.default_timer()
-# Save workbook
-wb.save("./Excel/" + date + ".xlsx")
-# End timer
-end = timeit.default_timer()
-# Output save time
-print("Saved in " + str(end - start))
+    # Start timer
+    start = timeit.default_timer()
+    # Save workbook
+    wb.save("./Excel/" + date + ".xlsx")
+    # End timer
+    end = timeit.default_timer()
+    # Output save time
+    print("Saved in " + str(end - start))
+
+if __name__ == '__main__':
+    main()
