@@ -1,7 +1,6 @@
 import re
 import timeit
 from datetime import date
-
 import requests
 from bs4 import BeautifulSoup
 from openpyxl import load_workbook
