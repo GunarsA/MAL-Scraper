@@ -6,8 +6,7 @@ from bs4 import BeautifulSoup
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
-
-def scrape(ws, today):
+def scrape():
     # Start timer
     start = timeit.default_timer()
 
@@ -15,10 +14,10 @@ def scrape(ws, today):
     col_idx = get_column_letter(ws.max_column + 2)
 
     # Get html using requests
-    html_text = request_appropriate_website(ws)
+    html_text = request_website()
     # Check if correct spreadsheet
     if not html_text:
-        add_formula(ws, col_idx)
+        add_formula(col_idx)
         # Return statement
         return "Skipped"
     # Parse html using lxml
@@ -29,9 +28,9 @@ def scrape(ws, today):
     # Loop through entries
     for i in ranking:
         # Save data in temperary tuple
-        temp = get_appropriate_data(ws, i)
+        temp = find_core(i)
         # Add data to worksheet
-        add_to_current_worksheet(ws, temp[0], float(temp[1]), col_idx)
+        add_to_current_ws(temp[0], float(temp[1]), col_idx)
 
     # Add auto filter
     ws.auto_filter.ref = "A1:" + col_idx + str(ws.max_row)
@@ -46,8 +45,7 @@ def scrape(ws, today):
     # Return execution time
     return "Executed in " + str(end - start)
 
-
-def request_appropriate_website(ws):
+def request_website():
     # Get specific website's adress
     if ws.title == 'ARV':
         return requests.get('https://myanimelist.net/topanime.php').text
@@ -63,7 +61,7 @@ def request_appropriate_website(ws):
         return requests.get('https://myanimelist.net/topmanga.php?type=favorite').text
 
 
-def get_appropriate_data(ws, data):
+def find_core(data):
     # Get specific website's data
     if ws.title == 'ARV':
         title = data.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
@@ -90,10 +88,9 @@ def get_appropriate_data(ws, data):
     # Return as tuple
     return title, core
 
-
-def add_to_current_worksheet(ws, title, info, col_idx):
+def add_to_current_ws(title, info, col_idx):
     # Get row count
-    rows = row_count(ws)
+    rows = row_count()
     # Parse all entries
     for i in range(2, rows):
         # Find if entry already exists
@@ -114,8 +111,7 @@ def add_to_current_worksheet(ws, title, info, col_idx):
         # Add data
         ws[col_idx + str(rows)] = info
 
-
-def row_count(ws):
+def row_count():
     # Declare integer
     row_count = 1
     # Count rows with data
@@ -124,35 +120,28 @@ def row_count(ws):
     # Return row count + 1
     return row_count
 
-
-def add_formula(ws, col_idx):
+def add_formula(col_idx):
     for i in range(2, 52):
         ws[col_idx + str(i)].value = '=COUNTIF(ARV!$' + col_idx + '$' + str(i) + ':$' + col_idx + '$100,">"&ARV!' + col_idx + str(i) + ')+1'
 
+# Load workbook
+wb = load_workbook("./Excel/Input.xlsx")
 
-def main():
-    # Load workbook
-    wb = load_workbook("./Excel/Input.xlsx")
+# Get todays date
+today = date.today()
+# Convert date to #YY.MM.DD format
+date = today.strftime("%Y.%m.%d")
 
-    # Get todays date
-    temp = date.today()
-    # Convert date to #YY.MM.DD format
-    today = temp.strftime("%Y.%m.%d")
+# Loop through worksheets
+for ws in wb:
+    # Add new data to spreadsheet
+    print(scrape())
 
-    # Loop through worksheets
-    for ws in wb:
-        # Add new data to spreadsheet
-        print(scrape(ws, today))
-
-    # Start timer
-    start = timeit.default_timer()
-    # Save workbook
-    wb.save("./Excel/" + today + ".xlsx")
-    # End timer
-    end = timeit.default_timer()
-    # Output save time
-    print("Saved in " + str(end - start))
-
-
-if __name__ == '__main__':
-    main()
+# Start timer
+start = timeit.default_timer()
+# Save workbook
+wb.save("./Excel/" + date + ".xlsx")
+# End timer
+end = timeit.default_timer()
+# Output save time
+print("Saved in " + str(end - start))
