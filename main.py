@@ -92,23 +92,23 @@ def scrape(value_ws, order_ws):
             o_ws['B' + str(ws_row_count)] = title
             o_ws[col_idx + str(ws_row_count)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(ws_row_count) + ')+1'
 
-    collumn_index = get_column_letter(value_ws.max_column + 2)
-    html_text = request_specific_website(value_ws)
+    COLLUM_INDEX = get_column_letter(value_ws.max_column + 2)
+    HTML_TEXT = request_specific_website(value_ws)
 
-    soup = BeautifulSoup(html_text, 'lxml')
-    ranking_list = soup.find_all('tr', class_ = 'ranking-list')
+    SOUP = BeautifulSoup(HTML_TEXT, 'lxml')
+    RANKING_LIST = SOUP.find_all('tr', class_ = 'ranking-list')
 
-    for animanga_soup_data in ranking_list:
+    for animanga_soup_data in RANKING_LIST:
         temp = find_specific_animanga_data(value_ws, animanga_soup_data)
-        add_data_to_worksheets(value_ws, order_ws, temp[0], float(temp[1]), collumn_index)
+        add_data_to_worksheets(value_ws, order_ws, temp[0], float(temp[1]), COLLUM_INDEX)
 
-    value_ws.auto_filter.ref = "A1:" + collumn_index + str(value_ws.max_row)
-    value_ws[collumn_index + '1'] = date.today()
-    value_ws[chr(ord(collumn_index) - 1) + '1'] = 'Change'
+    value_ws.auto_filter.ref = "A1:" + COLLUM_INDEX + str(value_ws.max_row)
+    value_ws[COLLUM_INDEX + '1'] = date.today()
+    value_ws[chr(ord(COLLUM_INDEX) - 1) + '1'] = 'Change'
 
-    order_ws.auto_filter.ref = "A1:" + collumn_index + str(value_ws.max_row)
-    order_ws[collumn_index + '1'] = date.today()
-    order_ws[chr(ord(collumn_index) - 1) + '1'] = 'Change'
+    order_ws.auto_filter.ref = "A1:" + COLLUM_INDEX + str(value_ws.max_row)
+    order_ws[COLLUM_INDEX + '1'] = date.today()
+    order_ws[chr(ord(COLLUM_INDEX) - 1) + '1'] = 'Change'
 
 
 def main():
