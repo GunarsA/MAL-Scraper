@@ -7,6 +7,8 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 
+# Wraper function to calculate runtime of a function (function is able to
+# return value if needed)
 def calculate_runtime(func):
     def inner_function(*args, **kwargs):
         begin = timeit.default_timer()
@@ -17,6 +19,9 @@ def calculate_runtime(func):
     return inner_function
 
 
+# Scrapes data from 6 MyAnimeList top rankings and stores it in different
+# worksheets. Function also adds "Excel functions" that calculate order of
+# animanga and stores it in seperate sheet.
 @calculate_runtime
 def scrape_worksheet(value_ws, order_ws):
 
@@ -111,6 +116,7 @@ def scrape_worksheet(value_ws, order_ws):
     order_ws[chr(ord(COLLUM_INDEX) - 1) + '1'] = 'Change'
 
 
+# Program adds aditional data to premade data worksheets
 def main():
     workbook = load_workbook("./Excel/Input.xlsx")
 
