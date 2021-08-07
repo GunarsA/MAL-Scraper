@@ -107,7 +107,7 @@ def add_data_to_worksheets(v_ws, o_ws, title, info, col_idx):
             if v_ws[chr(ord(col_idx) - 2) + str(i)].value:
                 v_ws[chr(ord(col_idx) - 1) + str(i)].value = info - v_ws[chr(ord(col_idx) - 2) + str(i)].value
 
-            o_ws[col_idx + str(i)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$' + str(i) + ':$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(i) + ')+1'
+            o_ws[col_idx + str(i)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(i) + ')+1'
             if o_ws[chr(ord(col_idx) - 2) + str(i)].value:
                 o_ws[chr(ord(col_idx) - 1) + str(i)].value = '=' + (col_idx + str(i)) + ' - ' + (chr(ord(col_idx) - 2) + str(i))
 
@@ -123,7 +123,7 @@ def add_data_to_worksheets(v_ws, o_ws, title, info, col_idx):
 
         o_ws['A' + str(ws_row_count)] = '#' + str(ws_row_count - 1)
         o_ws['B' + str(ws_row_count)] = title
-        o_ws[col_idx + str(ws_row_count)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$' + str(ws_row_count) + ':$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(ws_row_count) + ')+1'
+        o_ws[col_idx + str(ws_row_count)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(ws_row_count) + ')+1'
 
 
 def main():
