@@ -14,7 +14,8 @@ def calculate_runtime(func):
         begin = timeit.default_timer()
         return_value = func(*args, **kwargs)
         end = timeit.default_timer()
-        print("Runtime of '" + func.__name__ + "' function : " + str(end - begin) + "\n")
+        print("Runtime of '" + func.__name__ + "' function : " 
+        + str(end - begin) + "\n")
         return return_value
     return inner_function
 
@@ -42,19 +43,24 @@ def scrape_worksheet(value_ws, order_ws):
 
     def find_specific_animanga_data(ws, soup):
         if ws.title == 'ARV':
-            title = soup.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
-            core = soup.find('td', class_ = 'score ac fs14').text.replace('\n','').replace(' ','')
+            title = soup.find('h3', class_
+            = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
+            core = soup.find('td', class_
+            = 'score ac fs14').text.replace('\n','').replace(' ','')
         if ws.title == 'AMV':
-            title = soup.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
+            title = soup.find('h3', class_
+            = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
             temp = soup.find(string = re.compile('members'))
             core = temp.replace(' ','').replace(',','').replace('members','').replace('\n','')
         if ws.title == 'AFV':
-            title = soup.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
+            title = soup.find('h3', class_
+            = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
             temp = soup.find(string = re.compile('favorites'))
             core = temp.replace(' ','').replace(',','').replace('favorites','').replace('\n','')
         if ws.title == 'MRV':
             title = soup.find('h3', class_ = 'manga_h3').text
-            core = soup.find('td', class_ = 'score ac fs14').text.replace('\n','')
+            core = soup.find('td', class_
+            = 'score ac fs14').text.replace('\n','')
         if ws.title == 'MMV':
             title = soup.find('h3', class_ = 'manga_h3').text
             temp = soup.find(string = re.compile('members'))
@@ -76,13 +82,19 @@ def scrape_worksheet(value_ws, order_ws):
         for i in range(2, get_worksheet_row_count(v_ws)):
             if v_ws['B' + str(i)].value == title:
                 v_ws[col_idx + str(i)] = info
+
+                o_ws[col_idx + str(i)] = ('=COUNTIF(' + v_ws.title + '!$'
+                + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title
+                + '!' + col_idx + str(i) + ')+1')
+
                 if v_ws[chr(ord(col_idx) - 2) + str(i)].value:
-                    v_ws[chr(ord(col_idx) - 1) + str(i)].value = info - v_ws[chr(ord(col_idx) - 2) + str(i)].value
+                    v_ws[chr(ord(col_idx) - 1) + str(i)].value = (info 
+                    - v_ws[chr(ord(col_idx) - 2) + str(i)].value)
 
-                o_ws[col_idx + str(i)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(i) + ')+1'
-                if o_ws[chr(ord(col_idx) - 2) + str(i)].value:
-                    o_ws[chr(ord(col_idx) - 1) + str(i)].value = '=' + (chr(ord(col_idx) - 2) + str(i)) + ' - ' + (col_idx + str(i))
-
+                    o_ws[chr(ord(col_idx) - 1) + str(i)].value = ('=' 
+                    + (chr(ord(col_idx) - 2) + str(i)) + ' - '
+                    + (col_idx + str(i)))
+                    
                 break
 
         else:
@@ -95,7 +107,9 @@ def scrape_worksheet(value_ws, order_ws):
 
             o_ws['A' + str(ws_row_count)] = '#' + str(ws_row_count - 1)
             o_ws['B' + str(ws_row_count)] = title
-            o_ws[col_idx + str(ws_row_count)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(ws_row_count) + ')+1'
+            o_ws[col_idx + str(ws_row_count)] = ('=COUNTIF(' + v_ws.title
+            + '!$' + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title
+            + '!' + col_idx + str(ws_row_count) + ')+1')
 
     COLLUM_INDEX = get_column_letter(value_ws.max_column + 2)
     HTML_TEXT = request_specific_website(value_ws)
@@ -105,7 +119,8 @@ def scrape_worksheet(value_ws, order_ws):
 
     for animanga_soup_data in RANKING_LIST:
         TEMP = find_specific_animanga_data(value_ws, animanga_soup_data)
-        add_data_to_worksheets(value_ws, order_ws, TEMP[0], float(TEMP[1]), COLLUM_INDEX)
+        add_data_to_worksheets(value_ws, order_ws, TEMP[0], float(TEMP[1]),
+        COLLUM_INDEX)
 
     value_ws.auto_filter.ref = "A1:" + COLLUM_INDEX + str(value_ws.max_row)
     value_ws[COLLUM_INDEX + '1'] = date.today()
@@ -133,12 +148,14 @@ def main():
     TODAYS_DATE = TEMP.strftime("%Y.%m.%d")
 
     for main_worksheet_title in WORKSHEET_TITLE_DICTIONARY:
-        scrape_worksheet(workbook[main_worksheet_title], workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]])
+        scrape_worksheet(workbook[main_worksheet_title],
+        workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]])
 
     START_TIME = timeit.default_timer()
     workbook.save("./Excel/" + TODAYS_DATE + ".xlsx")
     END_TIME = timeit.default_timer()
-    print("Saved as '" + TODAYS_DATE + ".xlsx" + "' in " + str(END_TIME - START_TIME))
+    print("Saved as '" + TODAYS_DATE + ".xlsx" + "' in "
+    + str(END_TIME - START_TIME))
 
 
 if __name__ == '__main__':
