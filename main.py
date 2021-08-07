@@ -8,57 +8,45 @@ from openpyxl.utils import get_column_letter
 
 
 def calculate_time(func):
+
     def inner1(*args, **kwargs):
+
         begin = timeit.default_timer()
         return_value = func(*args, **kwargs)
         end = timeit.default_timer()
         print("Total time taken in '" + func.__name__ + "' function:" + str(end - begin))
+
         return return_value
+
     return inner1
 
+
 @calculate_time
-def scrape(ws, today):
-    # Start timer
-    #start = timeit.default_timer()
+def scrape(ws, today): 
 
-    # Get first empty column 
     col_idx = get_column_letter(ws.max_column + 2)
-
-    # Get html using requests
     html_text = request_appropriate_website(ws)
-    # Check if correct spreadsheet
+
     if not html_text:
         add_formula(ws, col_idx)
         # Return statement
         return "Skipped"
-    # Parse html using lxml
+
     soup = BeautifulSoup(html_text, 'lxml')
-    # Get data
     ranking = soup.find_all('tr', class_ = 'ranking-list')
 
-    # Loop through entries
     for i in ranking:
-        # Save data in temperary tuple
         temp = get_appropriate_data(ws, i)
-        # Add data to worksheet
         add_to_current_worksheet(ws, temp[0], float(temp[1]), col_idx)
 
-    # Add auto filter
     ws.auto_filter.ref = "A1:" + col_idx + str(ws.max_row)
-
-    # Add date rows title
     ws[col_idx + '1'] = today
-    # Add 'Change' rows title
     ws[chr(ord(col_idx) - 1) + '1'] = 'Change'
-    # End timer
-    #end = timeit.default_timer()
 
-    # Return execution time
     return "Executed"
 
 
 def request_appropriate_website(ws):
-    # Get specific website's adress
     if ws.title == 'ARV':
         return requests.get('https://myanimelist.net/topanime.php').text
     if ws.title == 'AMV':
@@ -74,7 +62,6 @@ def request_appropriate_website(ws):
 
 
 def get_appropriate_data(ws, data):
-    # Get specific website's data
     if ws.title == 'ARV':
         title = data.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
         core = data.find('td', class_ = 'score ac fs14').text.replace('\n','').replace(' ','')
@@ -97,41 +84,27 @@ def get_appropriate_data(ws, data):
         title = data.find('h3', class_ = 'manga_h3').text
         temp = data.find(string = re.compile('favorites'))
         core = temp.replace(' ','').replace(',','').replace('favorites','').replace('\n','')
-    # Return as tuple
     return title, core
 
 
 def add_to_current_worksheet(ws, title, info, col_idx):
-    # Get row count
     rows = row_count(ws)
-    # Parse all entries
     for i in range(2, rows):
-        # Find if entry already exists
         if ws['B' + str(i)].value == title:
-            # Add new data
             ws[col_idx + str(i)] = info
-            # Check if there is data in previous column
             if ws[chr(ord(col_idx) - 2) + str(i)].value:
-                # Calculate change from previous entry
                 ws[chr(ord(col_idx) - 1) + str(i)].value = info - ws[chr(ord(col_idx) - 2) + str(i)].value
             break
-    # If no matching entry found add new
     else:
-        # Add index
         ws['A' + str(rows)] = '#' + str(rows - 1)
-        # Add title
         ws['B' + str(rows)] = title
-        # Add data
         ws[col_idx + str(rows)] = info
 
 
 def row_count(ws):
-    # Declare integer
     row_count = 1
-    # Count rows with data
     while ws['A' + str(row_count)].value:
             row_count += 1
-    # Return row count + 1
     return row_count
 
 
@@ -141,26 +114,17 @@ def add_formula(ws, col_idx):
 
 
 def main():
-    # Load workbook
+
     wb = load_workbook("./Excel/Input.xlsx")
-
-    # Get todays date
     temp = date.today()
-    # Convert date to #YY.MM.DD format
     today = temp.strftime("%Y.%m.%d")
-
-    # Loop through worksheets
+    
     for ws in wb:
-        # Add new data to spreadsheet
         print(scrape(ws, today))
 
-    # Start timer
     start = timeit.default_timer()
-    # Save workbook
     wb.save("./Excel/" + today + ".xlsx")
-    # End timer
     end = timeit.default_timer()
-    # Output save time
     print("Saved in " + str(end - start))
 
 
