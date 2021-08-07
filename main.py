@@ -7,27 +7,23 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 
-def calculate_time(func):
-
+def calculate_runtime(func):
     def inner1(*args, **kwargs):
-
         begin = timeit.default_timer()
         return_value = func(*args, **kwargs)
         end = timeit.default_timer()
-        print("Total time taken in '" + func.__name__ + "' function:" + str(end - begin))
-
+        print("Runtime of '" + func.__name__ + "' function : " + str(end - begin))
         return return_value
-
     return inner1
 
 
-@calculate_time
+@calculate_runtime
 def scrape(ws, today): 
 
     col_idx = get_column_letter(ws.max_column + 2)
     html_text = request_appropriate_website(ws)
 
-    if not html_text:
+    if html_text == 'error':
         add_formula(ws, col_idx)
         # Return statement
         return "Skipped"
@@ -45,22 +41,29 @@ def scrape(ws, today):
 
     return "Executed"
 
-
+#TODO replace with dictionary
 def request_appropriate_website(ws):
-    if ws.title == 'ARV':
-        return requests.get('https://myanimelist.net/topanime.php').text
-    if ws.title == 'AMV':
-        return requests.get('https://myanimelist.net/topanime.php?type=bypopularity').text
-    if ws.title == 'AFV':
-        return requests.get('https://myanimelist.net/topanime.php?type=favorite').text
-    if ws.title == 'MRV':
-        return requests.get('https://myanimelist.net/topmanga.php').text
-    if ws.title == 'MMV':
-        return requests.get('https://myanimelist.net/topmanga.php?type=bypopularity').text
-    if ws.title == 'MFV':
-        return requests.get('https://myanimelist.net/topmanga.php?type=favorite').text
+    temp = get_data(ws.title)
+    
+    if temp == 'error':
+        return temp
+
+    return requests.get(temp[1]).text
 
 
+def get_data(x):
+    TITLE_DICTIONARY = {
+        'ARV': ('ARO', 'https://myanimelist.net/topanime.php'),
+        'AMV': ('AMO', 'https://myanimelist.net/topanime.php?type=bypopularity'),
+        'AFV': ('AFO', 'https://myanimelist.net/topanime.php?type=favorite'),
+        'MRV': ('MRO', 'https://myanimelist.net/topmanga.php'),
+        'MMV': ('MMO', 'https://myanimelist.net/topmanga.php?type=bypopularity'),
+        'MFV': ('MFO', 'https://myanimelist.net/topmanga.php?type=favorite'),
+    }
+    return TITLE_DICTIONARY.get(x, 'error')
+
+
+#TODO replace with dictionary
 def get_appropriate_data(ws, data):
     if ws.title == 'ARV':
         title = data.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
@@ -114,16 +117,15 @@ def add_formula(ws, col_idx):
 
 
 def main():
-
     wb = load_workbook("./Excel/Input.xlsx")
     temp = date.today()
-    today = temp.strftime("%Y.%m.%d")
-    
+    TODAYS_DATE = temp.strftime("%Y.%m.%d")
+
     for ws in wb:
-        print(scrape(ws, today))
+        print(scrape(ws, TODAYS_DATE))
 
     start = timeit.default_timer()
-    wb.save("./Excel/" + today + ".xlsx")
+    wb.save("./Excel/" + TODAYS_DATE + ".xlsx")
     end = timeit.default_timer()
     print("Saved in " + str(end - start))
 
