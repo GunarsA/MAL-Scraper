@@ -102,7 +102,8 @@ def scrape_worksheet(value_ws, order_ws):
                 break
 
         else:
-            print('New animanga added to ' + v_ws.title + ': ' + title)
+            print('New animanga added to ' + v_ws.title + ': ' + title + ' | '
+            + str(info))
             ws_row_count = get_worksheet_row_count(v_ws)
 
             v_ws['A' + str(ws_row_count)] = '#' + str(ws_row_count - 1)
