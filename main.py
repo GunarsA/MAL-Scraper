@@ -8,16 +8,16 @@ from openpyxl.utils import get_column_letter
 
 
 def calculate_runtime(func):
-    def inner1(*args, **kwargs):
+    def inner_function(*args, **kwargs):
         begin = timeit.default_timer()
         return_value = func(*args, **kwargs)
         end = timeit.default_timer()
         print("Runtime of '" + func.__name__ + "' function : " + str(end - begin) + "\n")
         return return_value
-    return inner1
+    return inner_function
 
 
-def get_url(worksheet_title):
+def get_specific_url(ws_title):
     URL_DICTIONARY = {
         'ARV': 'https://myanimelist.net/topanime.php',
         'AMV': 'https://myanimelist.net/topanime.php?type=bypopularity',
@@ -26,35 +26,35 @@ def get_url(worksheet_title):
         'MMV': 'https://myanimelist.net/topmanga.php?type=bypopularity',
         'MFV': 'https://myanimelist.net/topmanga.php?type=favorite'
     }
-    return URL_DICTIONARY.get(worksheet_title)
+    return URL_DICTIONARY.get(ws_title)
 
 
-def request_appropriate_website(ws):
-    return requests.get(get_url(ws.title)).text
+def request_specific_website(ws):
+    return requests.get(get_specific_url(ws.title)).text
 
 
-def get_appropriate_data(ws, soup_data):
+def find_specific_animanga_data(ws, soup):
     if ws.title == 'ARV':
-        title = soup_data.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
-        core = soup_data.find('td', class_ = 'score ac fs14').text.replace('\n','').replace(' ','')
+        title = soup.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
+        core = soup.find('td', class_ = 'score ac fs14').text.replace('\n','').replace(' ','')
     if ws.title == 'AMV':
-        title = soup_data.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
-        temp = soup_data.find(string = re.compile('members'))
+        title = soup.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
+        temp = soup.find(string = re.compile('members'))
         core = temp.replace(' ','').replace(',','').replace('members','').replace('\n','')
     if ws.title == 'AFV':
-        title = soup_data.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
-        temp = soup_data.find(string = re.compile('favorites'))
+        title = soup.find('h3', class_ = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
+        temp = soup.find(string = re.compile('favorites'))
         core = temp.replace(' ','').replace(',','').replace('favorites','').replace('\n','')
     if ws.title == 'MRV':
-        title = soup_data.find('h3', class_ = 'manga_h3').text
-        core = soup_data.find('td', class_ = 'score ac fs14').text.replace('\n','')
+        title = soup.find('h3', class_ = 'manga_h3').text
+        core = soup.find('td', class_ = 'score ac fs14').text.replace('\n','')
     if ws.title == 'MMV':
-        title = soup_data.find('h3', class_ = 'manga_h3').text
-        temp = soup_data.find(string = re.compile('members'))
+        title = soup.find('h3', class_ = 'manga_h3').text
+        temp = soup.find(string = re.compile('members'))
         core = temp.replace(' ','').replace(',','').replace('members','').replace('\n','')
     if ws.title == 'MFV':
-        title = soup_data.find('h3', class_ = 'manga_h3').text
-        temp = soup_data.find(string = re.compile('favorites'))
+        title = soup.find('h3', class_ = 'manga_h3').text
+        temp = soup.find(string = re.compile('favorites'))
         core = temp.replace(' ','').replace(',','').replace('favorites','').replace('\n','')
     return (title, core)
 
@@ -63,13 +63,13 @@ def get_appropriate_data(ws, soup_data):
 def scrape(value_ws, order_ws): 
 
     collumn_index = get_column_letter(value_ws.max_column + 2)
-    html_text = request_appropriate_website(value_ws)
+    html_text = request_specific_website(value_ws)
 
     soup = BeautifulSoup(html_text, 'lxml')
     ranking_list = soup.find_all('tr', class_ = 'ranking-list')
 
-    for animanga in ranking_list:
-        temp = get_appropriate_data(value_ws, animanga)
+    for animanga_soup_data in ranking_list:
+        temp = find_specific_animanga_data(value_ws, animanga_soup_data)
         add_data_to_worksheets(value_ws, order_ws, temp[0], float(temp[1]), collumn_index)
 
     value_ws.auto_filter.ref = "A1:" + collumn_index + str(value_ws.max_row)
