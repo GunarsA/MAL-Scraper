@@ -24,11 +24,11 @@ def calculate_runtime(func):
 # worksheets. Function also adds "Excel functions" that calculate order of
 # animanga and stores it in seperate sheet.
 @calculate_runtime
-def scrape_worksheet(value_ws, order_ws):
+def _scrape_worksheet(value_ws, order_ws):
 
-    def request_specific_website(ws):
+    def _request_specific_website(ws):
 
-        def get_specific_url(ws_title):
+        def _get_specific_url(ws_title):
             URL_DICTIONARY = {
                 'ARV': 'https://myanimelist.net/topanime.php',
                 'AMV': 'https://myanimelist.net/topanime.php?type=bypopularity',
@@ -39,9 +39,9 @@ def scrape_worksheet(value_ws, order_ws):
             }
             return URL_DICTIONARY.get(ws_title)
         
-        return requests.get(get_specific_url(ws.title)).text
+        return requests.get(_get_specific_url(ws.title)).text
 
-    def find_specific_animanga_data(ws, soup):
+    def _find_specific_animanga_data(ws, soup):
         if ws.title == 'ARV':
             title = soup.find('h3', class_
             = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
@@ -75,15 +75,15 @@ def scrape_worksheet(value_ws, order_ws):
             .replace('favorites','').replace('\n','')
         return (title, core)
 
-    def add_data_to_worksheets(v_ws, o_ws, title, info, col_idx):
+    def _add_data_to_worksheets(v_ws, o_ws, title, info, col_idx):
 
-        def get_worksheet_row_count(ws):
+        def _get_worksheet_row_count(ws):
             row_count = 1
             while ws['A' + str(row_count)].value:
                     row_count += 1
             return row_count
         
-        for i in range(2, get_worksheet_row_count(v_ws)):
+        for i in range(2, _get_worksheet_row_count(v_ws)):
             if v_ws['B' + str(i)].value == title:
                 v_ws[col_idx + str(i)] = info
 
@@ -104,7 +104,7 @@ def scrape_worksheet(value_ws, order_ws):
         else:
             print('New animanga added to ' + v_ws.title + ': ' + title + ' | '
             + str(info))
-            ws_row_count = get_worksheet_row_count(v_ws)
+            ws_row_count = _get_worksheet_row_count(v_ws)
 
             v_ws['A' + str(ws_row_count)] = '#' + str(ws_row_count - 1)
             v_ws['B' + str(ws_row_count)] = title
@@ -117,14 +117,14 @@ def scrape_worksheet(value_ws, order_ws):
             + '!' + col_idx + str(ws_row_count) + ')+1')
 
     COLLUM_INDEX = get_column_letter(value_ws.max_column + 2)
-    HTML_TEXT = request_specific_website(value_ws)
+    HTML_TEXT = _request_specific_website(value_ws)
 
     SOUP = BeautifulSoup(HTML_TEXT, 'lxml')
     RANKING_LIST = SOUP.find_all('tr', class_ = 'ranking-list')
 
     for animanga_soup_data in RANKING_LIST:
-        TEMP = find_specific_animanga_data(value_ws, animanga_soup_data)
-        add_data_to_worksheets(value_ws, order_ws, TEMP[0], float(TEMP[1]),
+        TEMP = _find_specific_animanga_data(value_ws, animanga_soup_data)
+        _add_data_to_worksheets(value_ws, order_ws, TEMP[0], float(TEMP[1]),
         COLLUM_INDEX)
 
     value_ws.auto_filter.ref = "A1:" + COLLUM_INDEX + str(value_ws.max_row)
@@ -153,7 +153,7 @@ def main():
     TODAYS_DATE = TEMP.strftime("%Y.%m.%d")
 
     for main_worksheet_title in WORKSHEET_TITLE_DICTIONARY:
-        scrape_worksheet(workbook[main_worksheet_title],
+        _scrape_worksheet(workbook[main_worksheet_title],
         workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]])
 
     START_TIME = timeit.default_timer()
