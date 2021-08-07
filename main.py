@@ -72,7 +72,7 @@ def get_appropriate_data(ws, soup_data):
 
 
 @calculate_runtime
-def scrape(value_ws, order_ws, TODAYS_DATE): 
+def scrape(value_ws, order_ws): 
 
     collumn_index = get_column_letter(value_ws.max_column + 2)
     html_text = request_appropriate_website(value_ws)
@@ -85,11 +85,11 @@ def scrape(value_ws, order_ws, TODAYS_DATE):
         add_data_to_worksheets(value_ws, order_ws, temp[0], float(temp[1]), collumn_index)
 
     value_ws.auto_filter.ref = "A1:" + collumn_index + str(value_ws.max_row)
-    value_ws[collumn_index + '1'] = TODAYS_DATE
+    value_ws[collumn_index + '1'] = date.today()
     value_ws[chr(ord(collumn_index) - 1) + '1'] = 'Change'
 
     order_ws.auto_filter.ref = "A1:" + collumn_index + str(value_ws.max_row)
-    order_ws[collumn_index + '1'] = TODAYS_DATE
+    order_ws[collumn_index + '1'] = date.today()
     order_ws[chr(ord(collumn_index) - 1) + '1'] = 'Change'
 
 
@@ -142,7 +142,7 @@ def main():
     TODAYS_DATE = temp.strftime("%Y.%m.%d")
 
     for main_worksheet_title in WORKSHEET_TITLE_DICTIONARY:
-        scrape(workbook[main_worksheet_title], workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]], TODAYS_DATE)
+        scrape(workbook[main_worksheet_title], workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]])
 
     start = timeit.default_timer()
     workbook.save("./Excel/" + TODAYS_DATE + ".xlsx")
