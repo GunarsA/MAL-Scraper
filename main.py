@@ -109,7 +109,7 @@ def add_data_to_worksheets(v_ws, o_ws, title, info, col_idx):
 
             o_ws[col_idx + str(i)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(i) + ')+1'
             if o_ws[chr(ord(col_idx) - 2) + str(i)].value:
-                o_ws[chr(ord(col_idx) - 1) + str(i)].value = '=' + (col_idx + str(i)) + ' - ' + (chr(ord(col_idx) - 2) + str(i))
+                o_ws[chr(ord(col_idx) - 1) + str(i)].value = '=' + (chr(ord(col_idx) - 2) + str(i)) + ' - ' + (col_idx + str(i))
 
             break
 
@@ -128,7 +128,6 @@ def add_data_to_worksheets(v_ws, o_ws, title, info, col_idx):
 
 def main():
     workbook = load_workbook("./Excel/Input.xlsx")
-    #main_worksheet_titles = ('ARV', 'AMV', 'AFV', 'MRV', 'MMV', 'MFV')
 
     WORKSHEET_TITLE_DICTIONARY = {
         'ARV': 'ARO',
