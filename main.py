@@ -17,18 +17,6 @@ def calculate_runtime(func):
     return inner1
 
 
-def get_worksheet_title(worksheet_title):
-    WORKSHEET_TITLE_DICTIONARY = {
-        'ARV': 'ARO',
-        'AMV': 'AMO',
-        'AFV': 'AFO',
-        'MRV': 'MRO',
-        'MMV': 'MMO',
-        'MFV': 'MFO'
-    }
-    return WORKSHEET_TITLE_DICTIONARY.get(worksheet_title)
-
-
 def get_url(worksheet_title):
     URL_DICTIONARY = {
         'ARV': 'https://myanimelist.net/topanime.php',
