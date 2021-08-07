@@ -51,12 +51,14 @@ def scrape_worksheet(value_ws, order_ws):
             title = soup.find('h3', class_
             = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
             temp = soup.find(string = re.compile('members'))
-            core = temp.replace(' ','').replace(',','').replace('members','').replace('\n','')
+            core = temp.replace(' ','').replace(',','')\
+            .replace('members','').replace('\n','')
         if ws.title == 'AFV':
             title = soup.find('h3', class_
             = 'hoverinfo_trigger fl-l fs14 fw-b anime_ranking_h3').text
             temp = soup.find(string = re.compile('favorites'))
-            core = temp.replace(' ','').replace(',','').replace('favorites','').replace('\n','')
+            core = temp.replace(' ','').replace(',','')\
+            .replace('favorites','').replace('\n','')
         if ws.title == 'MRV':
             title = soup.find('h3', class_ = 'manga_h3').text
             core = soup.find('td', class_
@@ -64,11 +66,13 @@ def scrape_worksheet(value_ws, order_ws):
         if ws.title == 'MMV':
             title = soup.find('h3', class_ = 'manga_h3').text
             temp = soup.find(string = re.compile('members'))
-            core = temp.replace(' ','').replace(',','').replace('members','').replace('\n','')
+            core = temp.replace(' ','').replace(',','')\
+            .replace('members','').replace('\n','')
         if ws.title == 'MFV':
             title = soup.find('h3', class_ = 'manga_h3').text
             temp = soup.find(string = re.compile('favorites'))
-            core = temp.replace(' ','').replace(',','').replace('favorites','').replace('\n','')
+            core = temp.replace(' ','').replace(',','')\
+            .replace('favorites','').replace('\n','')
         return (title, core)
 
     def add_data_to_worksheets(v_ws, o_ws, title, info, col_idx):
