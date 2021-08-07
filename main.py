@@ -12,7 +12,7 @@ def calculate_runtime(func):
         begin = timeit.default_timer()
         return_value = func(*args, **kwargs)
         end = timeit.default_timer()
-        print("Runtime of '" + func.__name__ + "' function : " + str(end - begin))
+        print("Runtime of '" + func.__name__ + "' function : " + str(end - begin) + "\n")
         return return_value
     return inner1
 
@@ -88,34 +88,42 @@ def scrape(value_ws, order_ws, TODAYS_DATE):
     value_ws[collumn_index + '1'] = TODAYS_DATE
     value_ws[chr(ord(collumn_index) - 1) + '1'] = 'Change'
 
-
-def add_data_to_worksheets(v_ws, o_ws, title, info, col_idx):
-    rows = row_count(v_ws)
-    for i in range(2, rows):
-        if v_ws['B' + str(i)].value == title:
-            v_ws[col_idx + str(i)] = info
-            if v_ws[chr(ord(col_idx) - 2) + str(i)].value:
-                v_ws[chr(ord(col_idx) - 1) + str(i)].value = info - v_ws[chr(ord(col_idx) - 2) + str(i)].value
-            break
-
-            o_ws[col_idx + str(i)] = info
-            
-    else:
-        v_ws['A' + str(rows)] = '#' + str(rows - 1)
-        v_ws['B' + str(rows)] = title
-        v_ws[col_idx + str(rows)] = info
+    order_ws.auto_filter.ref = "A1:" + collumn_index + str(value_ws.max_row)
+    order_ws[collumn_index + '1'] = TODAYS_DATE
+    order_ws[chr(ord(collumn_index) - 1) + '1'] = 'Change'
 
 
-def row_count(ws):
+def get_worksheet_row_count(ws):
     row_count = 1
     while ws['A' + str(row_count)].value:
             row_count += 1
     return row_count
 
 
-def add_formula(ws, col_idx):
-    for i in range(2, 52):
-        ws[col_idx + str(i)].value = '=COUNTIF(ARV!$' + col_idx + '$' + str(i) + ':$' + col_idx + '$100,">"&ARV!' + col_idx + str(i) + ')+1'
+def add_data_to_worksheets(v_ws, o_ws, title, info, col_idx):
+    for i in range(2, get_worksheet_row_count(v_ws)):
+        if v_ws['B' + str(i)].value == title:
+            v_ws[col_idx + str(i)] = info
+            if v_ws[chr(ord(col_idx) - 2) + str(i)].value:
+                v_ws[chr(ord(col_idx) - 1) + str(i)].value = info - v_ws[chr(ord(col_idx) - 2) + str(i)].value
+
+            o_ws[col_idx + str(i)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$' + str(i) + ':$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(i) + ')+1'
+            if o_ws[chr(ord(col_idx) - 2) + str(i)].value:
+                o_ws[chr(ord(col_idx) - 1) + str(i)].value = '=' + (col_idx + str(i)) + ' - ' + (chr(ord(col_idx) - 2) + str(i))
+
+            break
+
+    else:
+        print('New animanga added to ' + v_ws.title + ': ' + title)
+        ws_row_count = get_worksheet_row_count(v_ws)
+
+        v_ws['A' + str(ws_row_count)] = '#' + str(ws_row_count - 1)
+        v_ws['B' + str(ws_row_count)] = title
+        v_ws[col_idx + str(ws_row_count)] = info
+
+        o_ws['A' + str(ws_row_count)] = '#' + str(ws_row_count - 1)
+        o_ws['B' + str(ws_row_count)] = title
+        o_ws[col_idx + str(ws_row_count)] = '=COUNTIF(' + v_ws.title + '!$' + col_idx + '$' + str(ws_row_count) + ':$' + col_idx + '$100,">"&' + v_ws.title + '!' + col_idx + str(ws_row_count) + ')+1'
 
 
 def main():
@@ -134,13 +142,13 @@ def main():
     temp = date.today()
     TODAYS_DATE = temp.strftime("%Y.%m.%d")
 
-    for main_worksheet_title in WORKSHEET_TITLE_DICTIONARY.keys:
-        print(scrape(workbook[main_worksheet_title], workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]], TODAYS_DATE))
+    for main_worksheet_title in WORKSHEET_TITLE_DICTIONARY:
+        scrape(workbook[main_worksheet_title], workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]], TODAYS_DATE)
 
     start = timeit.default_timer()
     workbook.save("./Excel/" + TODAYS_DATE + ".xlsx")
     end = timeit.default_timer()
-    print("Saved in " + str(end - start))
+    print("Saved as '" + TODAYS_DATE + ".xlsx" + "' in " + str(end - start))
 
 
 if __name__ == '__main__':
