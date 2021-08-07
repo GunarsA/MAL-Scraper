@@ -138,7 +138,7 @@ def _scrape_worksheet(value_ws, order_ws):
 
 # Program adds aditional data to premade data worksheets
 def main():
-    workbook = load_workbook("./Excel/Input.xlsx")
+    workbook = load_workbook("./Input.xlsx")
 
     WORKSHEET_TITLE_DICTIONARY = {
         'ARV': 'ARO',
