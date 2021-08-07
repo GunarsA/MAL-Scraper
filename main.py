@@ -10,15 +10,16 @@ from openpyxl.utils import get_column_letter
 def calculate_time(func):
     def inner1(*args, **kwargs):
         begin = timeit.default_timer()
-        func(*args, **kwargs)
+        return_value = func(*args, **kwargs)
         end = timeit.default_timer()
-        print("Total time taken in : ", func.__name__, end - begin)
+        print("Total time taken in '" + func.__name__ + "' function:" + str(end - begin))
+        return return_value
     return inner1
 
-
+@calculate_time
 def scrape(ws, today):
     # Start timer
-    start = timeit.default_timer()
+    #start = timeit.default_timer()
 
     # Get first empty column 
     col_idx = get_column_letter(ws.max_column + 2)
@@ -50,10 +51,10 @@ def scrape(ws, today):
     # Add 'Change' rows title
     ws[chr(ord(col_idx) - 1) + '1'] = 'Change'
     # End timer
-    end = timeit.default_timer()
+    #end = timeit.default_timer()
 
     # Return execution time
-    return "Executed in " + str(end - start)
+    return "Executed"
 
 
 def request_appropriate_website(ws):
@@ -100,7 +101,6 @@ def get_appropriate_data(ws, data):
     return title, core
 
 
-@calculate_time
 def add_to_current_worksheet(ws, title, info, col_idx):
     # Get row count
     rows = row_count(ws)
