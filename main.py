@@ -18,7 +18,7 @@ def calculate_runtime(func):
 
 
 @calculate_runtime
-def scrape(value_ws, order_ws):
+def scrape_worksheet(value_ws, order_ws):
 
     def request_specific_website(ws):
 
@@ -99,8 +99,8 @@ def scrape(value_ws, order_ws):
     RANKING_LIST = SOUP.find_all('tr', class_ = 'ranking-list')
 
     for animanga_soup_data in RANKING_LIST:
-        temp = find_specific_animanga_data(value_ws, animanga_soup_data)
-        add_data_to_worksheets(value_ws, order_ws, temp[0], float(temp[1]), COLLUM_INDEX)
+        TEMP = find_specific_animanga_data(value_ws, animanga_soup_data)
+        add_data_to_worksheets(value_ws, order_ws, TEMP[0], float(TEMP[1]), COLLUM_INDEX)
 
     value_ws.auto_filter.ref = "A1:" + COLLUM_INDEX + str(value_ws.max_row)
     value_ws[COLLUM_INDEX + '1'] = date.today()
@@ -123,16 +123,16 @@ def main():
         'MFV': 'MFO'
     }
     
-    temp = date.today()
-    TODAYS_DATE = temp.strftime("%Y.%m.%d")
+    TEMP = date.today()
+    TODAYS_DATE = TEMP.strftime("%Y.%m.%d")
 
     for main_worksheet_title in WORKSHEET_TITLE_DICTIONARY:
-        scrape(workbook[main_worksheet_title], workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]])
+        scrape_worksheet(workbook[main_worksheet_title], workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]])
 
-    start = timeit.default_timer()
+    START_TIME = timeit.default_timer()
     workbook.save("./Excel/" + TODAYS_DATE + ".xlsx")
-    end = timeit.default_timer()
-    print("Saved as '" + TODAYS_DATE + ".xlsx" + "' in " + str(end - start))
+    END_TIME = timeit.default_timer()
+    print("Saved as '" + TODAYS_DATE + ".xlsx" + "' in " + str(END_TIME - START_TIME))
 
 
 if __name__ == '__main__':
