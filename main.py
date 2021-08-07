@@ -7,6 +7,15 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 
+def calculate_time(func):
+    def inner1(*args, **kwargs):
+        begin = timeit.default_timer()
+        func(*args, **kwargs)
+        end = timeit.default_timer()
+        print("Total time taken in : ", func.__name__, end - begin)
+    return inner1
+
+
 def scrape(ws, today):
     # Start timer
     start = timeit.default_timer()
@@ -91,6 +100,7 @@ def get_appropriate_data(ws, data):
     return title, core
 
 
+@calculate_time
 def add_to_current_worksheet(ws, title, info, col_idx):
     # Get row count
     rows = row_count(ws)
