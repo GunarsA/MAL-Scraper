@@ -149,22 +149,15 @@ def main():
         'MFV': 'MFO'
     }
     
-    temp = date.today()
-    TODAYS_DATE = temp.strftime("%Y.%m.%d")
+    TEMP = date.today()
+    TODAYS_DATE = TEMP.strftime("%Y.%m.%d")
 
     for main_worksheet_title in WORKSHEET_TITLE_DICTIONARY:
         _scrape_worksheet(workbook[main_worksheet_title],
         workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]])
 
-    temp = input("Do you want to override the existing input? \n\
-    Enter (YES | NO): ")
-
     START_TIME = timeit.default_timer()
-
     workbook.save("./Excel/" + TODAYS_DATE + ".xlsx")
-    if temp == 'YES':
-        workbook.save('input.xlsx')
-
     END_TIME = timeit.default_timer()
     print("Saved as '" + TODAYS_DATE + ".xlsx" + "' in "
     + str(END_TIME - START_TIME))
