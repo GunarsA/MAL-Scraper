@@ -83,6 +83,8 @@ def _scrape_worksheet(value_ws, order_ws):
                     row_count += 1
             return row_count
         
+        data_has_changed_for_animanga = False
+
         for i in range(2, _get_worksheet_row_count(v_ws)):
             if v_ws['B' + str(i)].value == title:
                 v_ws[col_idx + str(i)] = info
@@ -94,15 +96,24 @@ def _scrape_worksheet(value_ws, order_ws):
                 if v_ws[chr(ord(col_idx) - 2) + str(i)].value:
                     v_ws[chr(ord(col_idx) - 1) + str(i)].value = (info 
                         - v_ws[chr(ord(col_idx) - 2) + str(i)].value)
+                    if info != v_ws[chr(ord(col_idx) - 2) + str(i)].value\
+                        and (v_ws.title == 'ARV' or v_ws.title == 'MRV'):
+                        print(title + " data changed: "
+                            + str(v_ws[chr(ord(col_idx) - 2) + str(i)].value)
+                            + " -> " + str(info))
+                        data_has_changed_for_animanga = True
 
                     o_ws[chr(ord(col_idx) - 1) + str(i)].value = ('=' 
                         + (chr(ord(col_idx) - 2) + str(i)) + ' - '
                         + (col_idx + str(i)))
+                else:
+                    print(title + " data changed: NULL -> " + str(info))
+                    data_has_changed_for_animanga = True
                     
                 break
 
         else:
-            print('New animanga added to ' + v_ws.title + ': ' + title + ' | '
+            print('+ New animanga added to ' + v_ws.title + ': ' + title + ' | '
                 + str(info))
             ws_row_count = _get_worksheet_row_count(v_ws)
 
@@ -115,6 +126,10 @@ def _scrape_worksheet(value_ws, order_ws):
             o_ws[col_idx + str(ws_row_count)] = ('=COUNTIF(' + v_ws.title
                 + '!$' + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title
                 + '!' + col_idx + str(ws_row_count) + ')+1')
+            
+            data_has_changed_for_animanga = True
+
+        return data_has_changed_for_animanga
 
     COLLUM_INDEX = get_column_letter(value_ws.max_column + 2)
     HTML_TEXT = _request_specific_website(value_ws)
@@ -122,10 +137,13 @@ def _scrape_worksheet(value_ws, order_ws):
     SOUP = BeautifulSoup(HTML_TEXT, 'lxml')
     RANKING_LIST = SOUP.find_all('tr', class_ = 'ranking-list')
 
+    data_has_changed_for_ws = False
+
     for animanga_soup_data in RANKING_LIST:
         TEMP = _find_specific_animanga_data(value_ws, animanga_soup_data)
-        _add_data_to_worksheets(value_ws, order_ws, TEMP[0], float(TEMP[1]),
-            COLLUM_INDEX)
+        if _add_data_to_worksheets(value_ws, order_ws, TEMP[0], float(TEMP[1]),
+            COLLUM_INDEX) == True:
+            data_has_changed_for_ws = True
 
     value_ws.auto_filter.ref = "A1:" + COLLUM_INDEX + str(value_ws.max_row)
     value_ws[COLLUM_INDEX + '1'] = date.today()
@@ -135,10 +153,13 @@ def _scrape_worksheet(value_ws, order_ws):
     order_ws[COLLUM_INDEX + '1'] = date.today()
     order_ws[chr(ord(COLLUM_INDEX) - 1) + '1'] = 'Change'
 
+    if not data_has_changed_for_ws:
+        print("No major changes in worksheet")
+
 
 # Program adds aditional data to premade data worksheets
 def main():
-    workbook = load_workbook("./Input.xlsx")
+    workbook = load_workbook("./input.xlsx")
 
     WORKSHEET_TITLE_DICTIONARY = {
         'ARV': 'ARO',
