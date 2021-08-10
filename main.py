@@ -14,8 +14,7 @@ def calculate_runtime(func):
         begin = timeit.default_timer()
         return_value = func(*args, **kwargs)
         end = timeit.default_timer()
-        print("Runtime of '" + func.__name__ + "' function : " 
-            + str(end - begin) + "\n")
+        print(f"Runtime of '{func.__name__}' function : {str(end - begin)}", "\n")
         return return_value
     return inner_function
 
@@ -98,23 +97,20 @@ def _scrape_worksheet(value_ws, order_ws):
                         - v_ws[chr(ord(col_idx) - 2) + str(i)].value)
                     if info != v_ws[chr(ord(col_idx) - 2) + str(i)].value\
                         and (v_ws.title == 'ARV' or v_ws.title == 'MRV'):
-                        print(title + " data changed: "
-                            + str(v_ws[chr(ord(col_idx) - 2) + str(i)].value)
-                            + " -> " + str(info))
+                        print(f"{title} data changed: {str(v_ws[chr(ord(col_idx) - 2) + str(i)].value)} -> {str(info)}")
                         data_has_changed_for_animanga = True
 
                     o_ws[chr(ord(col_idx) - 1) + str(i)].value = ('=' 
                         + (chr(ord(col_idx) - 2) + str(i)) + ' - '
                         + (col_idx + str(i)))
                 else:
-                    print(title + " data changed: NULL -> " + str(info))
+                    print(f"{title} data changed: NULL -> {str(info)}")
                     data_has_changed_for_animanga = True
                     
                 break
 
         else:
-            print('+ New animanga added to ' + v_ws.title + ': ' + title + ' | '
-                + str(info))
+            print(f"+ New animanga added to {v_ws.title}: {title} | {str(info)}")
             ws_row_count = _get_worksheet_row_count(v_ws)
 
             v_ws['A' + str(ws_row_count)] = '#' + str(ws_row_count - 1)
@@ -123,10 +119,9 @@ def _scrape_worksheet(value_ws, order_ws):
 
             o_ws['A' + str(ws_row_count)] = '#' + str(ws_row_count - 1)
             o_ws['B' + str(ws_row_count)] = title
-            o_ws[col_idx + str(ws_row_count)] = ('=COUNTIF(' + v_ws.title
-                + '!$' + col_idx + '$2:$' + col_idx + '$100,">"&' + v_ws.title
-                + '!' + col_idx + str(ws_row_count) + ')+1')
-            
+            o_ws[col_idx + str(ws_row_count)]\
+                = f"=COUNTIF({v_ws.title}!${col_idx}$2:${col_idx}$100,>&{v_ws.title}!{col_idx}{str(ws_row_count)})+1"
+
             data_has_changed_for_animanga = True
 
         return data_has_changed_for_animanga
@@ -178,10 +173,9 @@ def main():
             workbook[WORKSHEET_TITLE_DICTIONARY[main_worksheet_title]])
 
     START_TIME = timeit.default_timer()
-    workbook.save("./Excel/" + TODAYS_DATE + ".xlsx")
+    workbook.save(f"./Excel/{TODAYS_DATE}.xlsx")
     END_TIME = timeit.default_timer()
-    print("Saved as '" + TODAYS_DATE + ".xlsx" + "' in "
-    + str(END_TIME - START_TIME))
+    print(f"Saved as '{TODAYS_DATE}.xlsx in {str(END_TIME - START_TIME)}")
 
 
 if __name__ == '__main__':
